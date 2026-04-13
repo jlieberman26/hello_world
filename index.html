@@ -7,180 +7,265 @@
     <style>
         body {
             margin: 0;
+            padding: 0;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: "Apple Chancery", "Segoe Script", "Brush Script MT", cursive;
             overflow: hidden;
-            transition: background-color 0.5s ease;
-            text-align: center;
+            background-color: #87CEEB; /* Sky blue base */
+            font-family: 'Brush Script MT', cursive; /* Basic cursive font */
         }
 
-        #container {
+        /* 1. Cartoon Skyline Background */
+        body::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            /* Simplified cartoon skyline using layered gradients */
+            background:
+                /* Building 1 (Dark Grey) */
+                linear-gradient(to right, #333 10px, transparent 10px) 50px 0,
+                linear-gradient(#333, #333) 50px 0 / 40px 100px,
+                /* Building 2 (Red Brick) */
+                linear-gradient(to right, #B22222 10px, transparent 10px) 100px 20px,
+                linear-gradient(#B22222, #B22222) 100px 20px / 60px 80px,
+                /* Building 3 (Glass Tower - Lighter Grey) */
+                linear-gradient(to right, #555 10px, transparent 10px) 180px -20px,
+                linear-gradient(#555, #555) 180px -20px / 30px 120px,
+                /* Building 4 (Short Brick) */
+                linear-gradient(to right, #A0522D 10px, transparent 10px) 230px 40px,
+                linear-gradient(#A0522D, #A0522D) 230px 40px / 50px 60px;
+            background-repeat: repeat-x;
+            z-index: -1;
+            filter: drop-shadow(0 -5px 5px rgba(0,0,0,0.2));
+        }
+
+        #app {
+            text-align: center;
+            position: relative;
             z-index: 10;
-            padding: 20px;
         }
 
         h1 {
-            font-size: 3rem;
-            color: #333;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-size: 2.5rem;
             margin-bottom: 20px;
         }
 
-        /* Wave Button Styling */
-        .wave-button {
+        /* 2. Style text to be cursive */
+        #dynamic-text {
+            color: #ffd700; /* Gold */
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        button {
             padding: 15px 30px;
             font-size: 1.2rem;
-            font-family: inherit;
             cursor: pointer;
             border: none;
-            border-radius: 50px;
+            border-radius: 5px;
+            font-family: 'Brush Script MT', cursive;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        /* Standard Start Button */
+        #start-btn {
+            background-color: #f44336; /* Red */
             color: white;
-            position: relative;
-            background: #0077be;
-            /* Creates the wave visual in the middle */
-            background-image: radial-gradient(circle at 50% 100%, #00aaff 20%, transparent 25%),
-                              radial-gradient(circle at 50% 0%, #0077be 20%, transparent 25%);
-            background-size: 20px 40px;
-            background-repeat: repeat-x;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
         }
 
-        .wave-button:hover {
-            transform: scale(1.05);
+        #start-btn:hover {
+            background-color: #d32f2f;
         }
 
-        .wave-button::after {
-            content: "Boston Sports";
-            display: block;
-            font-size: 0.6rem;
-            margin-top: 5px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        #sports-options {
-            margin-top: 20px;
+        /* Themed Team Buttons */
+        #options-container {
             display: none;
             gap: 15px;
             justify-content: center;
+            margin-top: 20px;
         }
 
-        /* Canvas for Fireworks */
-        #canvas {
+        .team-btn {
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .team-btn:active {
+            transform: translateY(2px);
+        }
+
+        /* Add Team Symbols (Simplified Pseudo-elements) */
+        /* 3. Team colors and historical symbols */
+        
+        /* Red Sox: Red, Citgo Sign (Simplified Triangle) */
+        #sox-btn {
+            background-color: #BD3039;
+        }
+        #sox-btn::after {
+            content: "▲"; /* Simple Citgo Triangle shape */
+            color: #C60C30;
+            font-size: 2rem;
+            position: absolute;
+            opacity: 0.3;
+            top: -10px;
+            right: 5px;
+        }
+
+        /* Celtics: Green, Leprechaun Hat (Simplified Shape) */
+        #celtics-btn {
+            background-color: #008348;
+        }
+        #celtics-btn::after {
+            content: "🎩"; /* Top Hat emoji for simple symbol */
+            font-size: 1.5rem;
+            position: absolute;
+            opacity: 0.3;
+            bottom: -5px;
+            left: 5px;
+        }
+
+        /* Patriots: Blue, Minute Man Tricorne (Simplified Shape) */
+        #patriots-btn {
+            background-color: #002244;
+        }
+        #patriots-btn::after {
+            content: "🧢"; /* Billed cap emoji, closest simple shape */
+            font-size: 1.5rem;
+            position: absolute;
+            opacity: 0.3;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* 4. Flying Crabs Container */
+        #crab-container {
             position: fixed;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
-            z-index: 1;
+            display: none;
+            z-index: 100;
+        }
+
+        .crab {
+            position: absolute;
+            font-size: 2rem;
+            user-select: none;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="canvas"></canvas>
+    <div id="app">
+        <h1>Welcome!</h1>
+        <h2 id="dynamic-text">Ready for more info?</h2>
+        <button id="start-btn">Click Me for More Information</button>
 
-    <div id="container">
-        <h1 id="main-text">Welcome to the Hub</h1>
-        <button id="main-btn" class="wave-button">Click Me for More Information</button>
-
-        <div id="sports-options">
-            <button class="wave-button" onclick="celebrate('Celtics')">Celtics</button>
-            <button class="wave-button" onclick="celebrate('Patriots')">Patriots</button>
-            <button class="wave-button" onclick="celebrate('Red Sox')">Red Sox</button>
+        <div id="options-container">
+            <button id="sox-btn" class="team-btn" onclick="celebrate('Red Sox')">Red Sox</button>
+            <button id="celtics-btn" class="team-btn" onclick="celebrate('Celtics')">Celtics</button>
+            <button id="patriots-btn" class="team-btn" onclick="celebrate('Patriots')">Patriots</button>
         </div>
     </div>
 
-    <script>
-        const mainBtn = document.getElementById('main-btn');
-        const mainText = document.getElementById('main-text');
-        const sportsOptions = document.getElementById('sports-options');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+    <div id="crab-container"></div>
 
-        const funPhrases = [
-            "Pick your champion!",
-            "The City of Champions awaits...",
-            "Which legend do you follow?",
-            "Make your choice!"
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const dynamicText = document.getElementById('dynamic-text');
+        const optionsContainer = document.getElementById('options-container');
+        const crabContainer = document.getElementById('crab-container');
+
+        const phrases = [
+            "What's your favorite crew?",
+            "Which team runs this town?",
+            "Choose your legend!",
+            "You got a favorite?"
         ];
 
-        // 1. Handle Main Button Click
-        mainBtn.addEventListener('click', () => {
+        startBtn.addEventListener('click', () => {
             // Random Background Color
-            const randomColor = `hsl(${Math.random() * 360}, 70%, 80%)`;
+            const randomColor = `hsl(${Math.random() * 360}, 60%, 80%)`;
             document.body.style.backgroundColor = randomColor;
 
             // Update Text
-            const randomPhrase = funPhrases[Math.floor(Math.random() * funPhrases.length)];
-            mainText.innerText = randomPhrase;
+            dynamicText.innerText = phrases[Math.floor(Math.random() * phrases.length)];
 
-            // Show Sports Buttons
-            mainBtn.style.display = 'none';
-            sportsOptions.style.display = 'flex';
+            // Swap Buttons
+            startBtn.style.display = 'none';
+            optionsContainer.style.display = 'flex';
         });
 
-        // 2. Firework Logic
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        let particles = [];
-
-        function celebrate(team) {
-            mainText.innerText = `Victory for the ${team}!`;
-            createFireworks();
+        // 5. Text updates to "Wicked Smart" and flying crabs
+        function celebrate(teamName) {
+            // Update the text
+            dynamicText.innerText = `You chose the ${teamName}. Wicked Smart!`;
+            
+            // Trigger flying crabs
+            flyCrabs();
         }
 
-        function createFireworks() {
-            for (let i = 0; i < 100; i++) {
-                particles.push(new Particle(canvas.width / 2, canvas.height / 2));
-            }
-            animate();
-        }
+        function flyCrabs() {
+            // Clear previous crabs if any
+            crabContainer.innerHTML = '';
+            crabContainer.style.display = 'block';
 
-        class Particle {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.size = Math.random() * 5 + 1;
-                this.speedX = Math.random() * 6 - 3;
-                this.speedY = Math.random() * 6 - 3;
-                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                this.size *= 0.95; // fade out
-            }
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
+            const crabCount = 30;
 
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
-                if (particles[i].size < 0.5) {
-                    particles.splice(i, 1);
-                    i--;
-                }
-            }
-            if (particles.length > 0) {
-                requestAnimationFrame(animate);
-            }
-        }
+            for (let i = 0; i < crabCount; i++) {
+                const crab = document.createElement('div');
+                crab.className = 'crab';
+                crab.innerText = '🦀'; // The crab emoji
 
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+                // Random starting positions near center
+                const startX = window.innerWidth / 2 + (Math.random() * 100 - 50);
+                const startY = window.innerHeight / 2 + (Math.random() * 100 - 50);
+                crab.style.left = startX + 'px';
+                crab.style.top = startY + 'px';
+
+                // Random end positions (flying off-screen)
+                const endX = (Math.random() * 2 - 1) * window.innerWidth * 1.5; // Fly far left or right
+                const endY = (Math.random() * -1.5) * window.innerHeight; // Fly up
+
+                // Animation parameters
+                const duration = Math.random() * 2 + 1; // 1 to 3 seconds
+
+                // Apply simple Javascript animation using CSS transitions/transforms
+                // Since this needs to be self-contained JS, we append keyframes dynamically or use timers.
+                // Dynamic CSS rule addition is cleaner here.
+                const keyframeName = `flyCrab${i}`;
+                const keyframes = `
+                    @keyframes ${keyframeName} {
+                        to {
+                            transform: translate(${endX}px, ${endY}px) rotate(${Math.random() * 720}deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                const styleSheet = document.styleSheets[0];
+                styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
+
+                crab.style.animation = `${keyframeName} ${duration}s ease-out forwards`;
+
+                crabContainer.appendChild(crab);
+            }
+
+            // Hide the container after animations finish
+            setTimeout(() => {
+                crabContainer.style.display = 'none';
+            }, 3000); // Wait for the longest duration
+        }
     </script>
 </body>
 </html>
