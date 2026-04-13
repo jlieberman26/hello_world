@@ -1,7 +1,186 @@
-<html>
-</h1> Hello, world! </h1>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boston Sports Hub</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Apple Chancery", "Segoe Script", "Brush Script MT", cursive;
+            overflow: hidden;
+            transition: background-color 0.5s ease;
+            text-align: center;
+        }
 
+        #container {
+            z-index: 10;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Wave Button Styling */
+        .wave-button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            position: relative;
+            background: #0077be;
+            /* Creates the wave visual in the middle */
+            background-image: radial-gradient(circle at 50% 100%, #00aaff 20%, transparent 25%),
+                              radial-gradient(circle at 50% 0%, #0077be 20%, transparent 25%);
+            background-size: 20px 40px;
+            background-repeat: repeat-x;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .wave-button:hover {
+            transform: scale(1.05);
+        }
+
+        .wave-button::after {
+            content: "Boston Sports";
+            display: block;
+            font-size: 0.6rem;
+            margin-top: 5px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        #sports-options {
+            margin-top: 20px;
+            display: none;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        /* Canvas for Fireworks */
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
 <body>
-<title> hi! </title>
+
+    <canvas id="canvas"></canvas>
+
+    <div id="container">
+        <h1 id="main-text">Welcome to the Hub</h1>
+        <button id="main-btn" class="wave-button">Click Me for More Information</button>
+
+        <div id="sports-options">
+            <button class="wave-button" onclick="celebrate('Celtics')">Celtics</button>
+            <button class="wave-button" onclick="celebrate('Patriots')">Patriots</button>
+            <button class="wave-button" onclick="celebrate('Red Sox')">Red Sox</button>
+        </div>
+    </div>
+
+    <script>
+        const mainBtn = document.getElementById('main-btn');
+        const mainText = document.getElementById('main-text');
+        const sportsOptions = document.getElementById('sports-options');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const funPhrases = [
+            "Pick your champion!",
+            "The City of Champions awaits...",
+            "Which legend do you follow?",
+            "Make your choice!"
+        ];
+
+        // 1. Handle Main Button Click
+        mainBtn.addEventListener('click', () => {
+            // Random Background Color
+            const randomColor = `hsl(${Math.random() * 360}, 70%, 80%)`;
+            document.body.style.backgroundColor = randomColor;
+
+            // Update Text
+            const randomPhrase = funPhrases[Math.floor(Math.random() * funPhrases.length)];
+            mainText.innerText = randomPhrase;
+
+            // Show Sports Buttons
+            mainBtn.style.display = 'none';
+            sportsOptions.style.display = 'flex';
+        });
+
+        // 2. Firework Logic
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+
+        function celebrate(team) {
+            mainText.innerText = `Victory for the ${team}!`;
+            createFireworks();
+        }
+
+        function createFireworks() {
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle(canvas.width / 2, canvas.height / 2));
+            }
+            animate();
+        }
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 5 + 1;
+                this.speedX = Math.random() * 6 - 3;
+                this.speedY = Math.random() * 6 - 3;
+                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.size *= 0.95; // fade out
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].size < 0.5) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            if (particles.length > 0) {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
 </body>
+</html>
